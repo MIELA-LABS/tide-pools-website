@@ -52,7 +52,7 @@ export const SITE = {
 
   hero: {
     eyebrow: "Pool cleaning & care · North DFW",
-    headline: "Crystal-clear pools, zero hassle.",
+    headline: "Crystal\u2011clear pools, zero hassle.", // \u2011 = non-breaking hyphen
     subline: "Weekly service, honest repairs and a photo E-Report after every visit, for homes in Plano, Richardson, McKinney, Allen, Garland, University Park and North Dallas.",
     primaryCta: { label: "Get a Free Quote", href: "#contact" },
     secondaryCta: { label: "Call (214) 538-9993", href: "tel:+12145389993" },
@@ -270,13 +270,35 @@ export const SITE = {
     messages: {
       sending: "Sending…",
       success: "Thanks! Your request is in. We'll be in touch within one business day.", // MOCK: confirm response time with Jack
-      error: "Sorry, something went wrong sending your request. Please try again, or call us at (214) 538-9993.",
-      notConfigured: "The quote form isn't connected yet in this preview. Please call (214) 538-9993 or email Swim@tidepoolsllc.com.",
+      error: "Sorry, something went wrong sending your request. Please try again, or call us at {phone}.",
+      notConfigured: "The quote form isn't connected yet in this preview. Please call {phone} or email {email}.",
       required: "Please fill in this field.",
       email: "Please enter a valid email address, like name@example.com.",
       phone: "Please enter a valid phone number, or leave it blank.",
       summary: "Please fix the highlighted fields and try again.",
     },
+  },
+
+  // Small interface labels (screen-reader text, button labels).
+  ui: {
+    menuOpen: "Open menu",
+    menuClose: "Close menu",
+    dismissRibbon: "Dismiss preview notice",
+    sliderLabel: "Before and after comparison",
+    sliderValueText: "{pct}% before image shown",
+    reviewsLabel: "Customer reviews",
+    ratingText: "{rating} ★ · {count} reviews",
+    ratingLabel: "Rated {rating} out of 5 from {count} reviews",
+    starsLabel: "{rating} out of 5 stars",
+    mapLabel: "Map of the North DFW cities Tide Pools serves",
+    popular: "Most Popular",
+    socialLabel: "Tide Pools on {name}",
+    footerNav: "Footer",
+    callUs: "Call",
+    emailUs: "Email",
+    hours: "Hours",
+    areas: "Service area",
+    rights: "All rights reserved.",
   },
 
   seo: {
