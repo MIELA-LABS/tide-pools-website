@@ -669,7 +669,8 @@ main:focus { outline: none; }
   background: rgba(56, 189, 248, .08);
 }
 
-.weekly-media { position: relative; }
+.weekly-media { position: relative; width: 100%; max-width: 520px; margin-inline: auto; }
+@media (min-width: 960px) { .weekly-media { max-width: none; } }
 .weekly-media .media { aspect-ratio: 4 / 5; box-shadow: var(--shadow-lg); }
 .weekly-media .media::after {
   content: "";
