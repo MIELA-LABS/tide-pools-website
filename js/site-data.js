@@ -311,9 +311,9 @@ export const SITE = {
   seo: {
     // Mirrors the <head> tags in index.html (kept static there for crawlers).
     title: "Tide Pools Texas | Pool Service & Repair in Plano, Richardson, McKinney & North Dallas",
-    description: "Family-owned pool cleaning, repair and weekly service in the North DFW metroplex since 2020. CPO® & RAIL certified, fully insured, E-Reports with every visit. Get a free quote.",
+    description: "Family-owned pool cleaning, repair and weekly service in Plano, Richardson, McKinney and North Dallas since 2020. CPO® & RAIL certified, fully insured. Free quotes.",
     canonical: "https://www.tidepoolsllc.com/",
-    ogImage: "assets/img/og-image.jpg", // MOCK photo
+    ogImage: "https://miela-labs.github.io/tide-pools-website/assets/img/og-image.jpg", // MOCK photo; switch to the production URL at launch
     themeColor: "#060D1F",
   },
 };
