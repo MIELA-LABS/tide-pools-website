@@ -168,14 +168,19 @@
   <link rel="preload" as="image" type="image/webp" imagesrcset="./assets/img/hero-960.webp 960w, ./assets/img/hero-1920.webp 1920w" imagesizes="100vw" fetchpriority="high">
   <link rel="stylesheet" href="./css/styles.css">
 
-  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    document.documentElement.classList.add("js");
+    try { if (sessionStorage.getItem("tp-preview-ribbon-dismissed") === "1") document.documentElement.classList.add("ribbon-dismissed"); } catch (e) {}
+  </script>
   <script type="module" src="./js/main.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Preview ribbon (rendered from SITE.isPreview) -->
-  <div id="preview-ribbon" class="preview-ribbon" role="region" aria-label="Preview notice" hidden></div>
+  <!-- Preview ribbon: removed automatically when SITE.isPreview = false (you can also delete this block at launch) -->
+  <div id="preview-ribbon" class="preview-ribbon" role="region" aria-label="Preview notice">
+    <span data-bind="previewRibbon">Preview: sample content</span>
+  </div>
 
   <!-- 1. Sticky header -->
   <header class="site-header" id="top">

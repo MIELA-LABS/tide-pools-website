@@ -262,7 +262,7 @@ main:focus { outline: none; }
   font-weight: 600;
   text-align: center;
 }
-.preview-ribbon[hidden] { display: none; }
+.preview-ribbon[hidden], .ribbon-dismissed .preview-ribbon { display: none; }
 .preview-ribbon-close {
   position: absolute;
   right: .5rem;

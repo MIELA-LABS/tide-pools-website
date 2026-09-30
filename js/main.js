@@ -95,15 +95,11 @@ const RIBBON_KEY = "tp-preview-ribbon-dismissed";
 
 function initRibbon() {
   const ribbon = $("#preview-ribbon");
-  if (!ribbon || !SITE.isPreview) return;
-  let dismissed = false;
-  try { dismissed = sessionStorage.getItem(RIBBON_KEY) === "1"; } catch { /* storage blocked */ }
-  if (dismissed) return;
+  if (!ribbon) return;
+  if (!SITE.isPreview) { ribbon.remove(); return; }
 
-  ribbon.innerHTML = `
-    <span>${esc(SITE.previewRibbon)}</span>
-    <button type="button" class="preview-ribbon-close" aria-label="${esc(SITE.ui.dismissRibbon)}">${icon("close")}</button>`;
-  ribbon.hidden = false;
+  ribbon.insertAdjacentHTML("beforeend",
+    `<button type="button" class="preview-ribbon-close" aria-label="${esc(SITE.ui.dismissRibbon)}">${icon("close")}</button>`);
   $(".preview-ribbon-close", ribbon).addEventListener("click", () => {
     ribbon.hidden = true;
     try { sessionStorage.setItem(RIBBON_KEY, "1"); } catch { /* storage blocked */ }
