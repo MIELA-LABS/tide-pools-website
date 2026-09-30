@@ -48,6 +48,7 @@ const ICONS = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   pin: '<path d="M12 21s7-6.1 7-11.5a7 7 0 1 0-14 0C5 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  "arrow-both": '<path d="m9 7-5 5 5 5M15 7l5 5-5 5"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
@@ -284,6 +285,259 @@ function renderPricing() {
     </article>`).join(""));
 }
 
+function renderGallery() {
+  const { items, beforeLabel, afterLabel } = SITE.gallery;
+  render("gallery", items.map((item, i) => `
+    <figure class="compare reveal" style="--i:${i % 2}">
+      <div class="compare-frame">
+        <div class="compare-layer compare-after">${picture(item.image, "gallery")}</div>
+        <div class="compare-layer compare-before${item.before ? " is-real" : ""}" aria-hidden="true">
+          ${picture({ ...item.image, ...(item.before ? { base: item.before } : {}), alt: "" }, "gallery")}
+        </div>
+        <span class="compare-tag compare-tag-before" aria-hidden="true">${esc(beforeLabel)}</span>
+        <span class="compare-tag compare-tag-after" aria-hidden="true">${esc(afterLabel)}</span>
+        <div class="compare-handle" role="slider" tabindex="0"
+          aria-label="${esc(SITE.ui.sliderLabel)}: ${esc(item.caption)}"
+          aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+          aria-valuetext="${esc(fmt(SITE.ui.sliderValueText, { pct: 50 }))}">
+          <span class="compare-knob">${icon("arrow-both")}</span>
+        </div>
+      </div>
+      <figcaption>${icon("sparkle")}${esc(item.caption)}</figcaption>
+    </figure>`).join(""));
+}
+
+function renderReviews() {
+  const { rating, count, items } = SITE.reviews;
+  const ratingStr = Number(rating).toFixed(1);
+  const [beforeStar, afterStar] = fmt(SITE.ui.ratingText, { rating: ratingStr, count }).split("★");
+  render("rating", `
+    <span aria-hidden="true">${esc(beforeStar.trim())}</span>
+    <span class="stars" aria-hidden="true">${icon("star")}</span>
+    <span aria-hidden="true">${esc((afterStar ?? "").trim())}</span>
+    <span class="visually-hidden">${esc(fmt(SITE.ui.ratingLabel, { rating: ratingStr, count }))}</span>`);
+
+  const list = render("reviews", items.map((r) => `
+    <article class="review">
+      <div class="stars" role="img" aria-label="${esc(fmt(SITE.ui.starsLabel, { rating: r.rating }))}">
+        ${icon("star").repeat(Math.round(r.rating))}
+      </div>
+      <blockquote><p>${esc(r.text)}</p></blockquote>
+      <footer>
+        <span class="review-avatar" aria-hidden="true">${esc(r.name.charAt(0))}</span>
+        <div>
+          <span class="review-name">${esc(r.name)}</span>
+          <span class="review-meta">${esc(r.city)} · ${esc(r.date)}</span>
+        </div>
+      </footer>
+    </article>`).join(""));
+  if (!list) return;
+  list.insertAdjacentHTML("afterend", `<p class="reviews-hint" aria-hidden="true">${esc(SITE.ui.reviewsHint)}</p>`);
+  list.setAttribute("role", "region");
+  list.setAttribute("aria-label", SITE.ui.reviewsLabel);
+
+  // Scrollable carousel (mobile) must be keyboard-focusable; the grid (desktop) needn't be.
+  const syncFocusable = () => {
+    if (list.scrollWidth > list.clientWidth + 1) list.setAttribute("tabindex", "0");
+    else list.removeAttribute("tabindex");
+  };
+  syncFocusable();
+  window.addEventListener("resize", syncFocusable, { passive: true });
+}
+
+function renderAreas() {
+  const { cities } = SITE.serviceAreas;
+  render("area-chips", cities.map((c) => `<li>${icon("pin")}${esc(c.name)}</li>`).join(""));
+
+  // Stylized map: project lat/lng into an SVG box (equirectangular, fine at this scale).
+  const W = 420, H = 460, PAD_X = 130, PAD_Y = 50;
+  const lats = cities.map((c) => c.lat), lngs = cities.map((c) => c.lng);
+  const [minLat, maxLat, minLng, maxLng] = [Math.min(...lats), Math.max(...lats), Math.min(...lngs), Math.max(...lngs)];
+  const kx = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+  const spanX = Math.max((maxLng - minLng) * kx, 1e-6), spanY = Math.max(maxLat - minLat, 1e-6);
+  const scale = Math.min((W - PAD_X * 2) / spanX, (H - PAD_Y * 2) / spanY);
+  const offX = (W - spanX * scale) / 2, offY = (H - spanY * scale) / 2;
+  const pts = cities.map((c) => ({
+    name: c.name,
+    x: offX + (c.lng - minLng) * kx * scale,
+    y: offY + (maxLat - c.lat) * scale,
+  }));
+  const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+  const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+
+  // Coverage zone: convex hull pushed outward, drawn with rounded corners.
+  const hull = convexHull(pts).map((p) => {
+    const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy) || 1;
+    return { x: p.x + (dx / d) * 34, y: p.y + (dy / d) * 34 };
+  });
+  const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  const zone = hull.map((p, i) => {
+    const m = mid(p, hull[(i + 1) % hull.length]);
+    return `${i === 0 ? `M${mid(hull[hull.length - 1], p).x.toFixed(1)} ${mid(hull[hull.length - 1], p).y.toFixed(1)} ` : ""}Q${p.x.toFixed(1)} ${p.y.toFixed(1)} ${m.x.toFixed(1)} ${m.y.toFixed(1)}`;
+  }).join(" ") + " Z";
+
+  const grid = [];
+  for (let x = 20; x < W; x += 40) grid.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`);
+  for (let y = 20; y < H; y += 40) grid.push(`<line x1="0" y1="${y}" x2="${W}" y2="${y}"/>`);
+  const leftEdge = offX + spanX * scale * 0.25;
+
+  render("area-map", `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="map-title" focusable="false">
+      <title id="map-title">${esc(SITE.ui.mapLabel)}</title>
+      <g class="map-grid">${grid.join("")}</g>
+      ${[70, 140, 210].map((r) => `<circle class="map-ring" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}"/>`).join("")}
+      <path class="map-zone" d="${zone}"/>
+      ${pts.map((p, i) => {
+        const left = p.x < leftEdge;
+        return `<g>
+          <circle class="map-pulse" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="7" style="animation-delay:${(i * 0.4).toFixed(1)}s"/>
+          <circle class="map-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="7"/>
+          <text class="map-label" x="${(p.x + (left ? -14 : 14)).toFixed(1)}" y="${(p.y + 5).toFixed(1)}" text-anchor="${left ? "end" : "start"}">${esc(p.name)}</text>
+        </g>`;
+      }).join("")}
+      <g transform="translate(${W - 34} 34)" aria-hidden="true">
+        <path class="map-compass-arrow" d="M0 -18 6 0 0 -4 -6 0Z"/>
+        <text class="map-compass" x="0" y="16" text-anchor="middle">${esc(SITE.ui.mapNorth)}</text>
+      </g>
+    </svg>`);
+}
+
+/** Monotone-chain convex hull. */
+function convexHull(points) {
+  const p = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
+  if (p.length < 3) return p;
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [], upper = [];
+  for (const pt of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], pt) <= 0) lower.pop();
+    lower.push(pt);
+  }
+  for (const pt of [...p].reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pt) <= 0) upper.pop();
+    upper.push(pt);
+  }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+
+function renderFaq() {
+  render("faq", SITE.faq.items.map((f) => `
+    <details class="faq-item">
+      <summary><span>${esc(f.q)}</span><span class="faq-toggle" aria-hidden="true">${icon("chevron")}</span></summary>
+      <div class="faq-answer"><p>${esc(f.a)}</p></div>
+    </details>`).join(""));
+}
+
+function renderContactPanel() {
+  const { company, contact, ui } = SITE;
+  render("service-options", [
+    ...SITE.services.categories.flatMap((c) => c.items.map((s) => s.name)),
+    contact.otherServiceOption,
+  ].map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join(""));
+
+  render("contact-panel", `
+    <h3>${esc(contact.panelTitle)}</h3>
+    <p>${esc(contact.panelText)}</p>
+    <ul class="contact-list">
+      <li><span class="icon-tile">${icon("phone")}</span>
+        <div><span class="contact-label">${esc(ui.callUs)}</span>
+        <a class="contact-value" href="${esc(company.phoneHref)}">${esc(company.phoneDisplay)}</a></div></li>
+      <li><span class="icon-tile">${icon("mail")}</span>
+        <div><span class="contact-label">${esc(ui.emailUs)}</span>
+        <a class="contact-value" href="mailto:${esc(company.email)}">${esc(company.email)}</a></div></li>
+      <li><span class="icon-tile">${icon("clock")}</span>
+        <div><span class="contact-label">${esc(ui.hours)}</span>
+        ${company.hours.map((h) => `<span class="contact-value">${esc(h.days)}: ${esc(h.time)}</span>`).join("")}</div></li>
+      <li><span class="icon-tile">${icon("pin")}</span>
+        <div><span class="contact-label">${esc(ui.areas)}</span>
+        <span class="contact-value">${esc(contact.serviceAreaSummary)}</span></div></li>
+    </ul>
+    <a class="btn btn-primary btn-block" href="${esc(company.phoneHref)}">${icon("phone")}${esc(SITE.hero.secondaryCta.label)}</a>`);
+}
+
+function renderFooter() {
+  const { company, nav, ui } = SITE;
+  render("footer", `
+    <div class="footer-brand">
+      <img src="./assets/logo-dark.svg" alt="${esc(company.brand)}" width="176" height="48" loading="lazy">
+      <p>${esc(company.about)}</p>
+      <ul class="socials">
+        ${company.social.map((s) => `
+          <li><a href="${esc(s.url)}" aria-label="${esc(fmt(ui.socialLabel, { name: s.name }))}">${icon(s.icon)}</a></li>`).join("")}
+      </ul>
+    </div>
+    <nav aria-label="${esc(ui.footerNav)}">
+      <h2 class="footer-title">${esc(ui.footerNav)}</h2>
+      <ul class="footer-links">
+        ${nav.map((n) => `<li><a href="${esc(n.href)}">${esc(n.label)}</a></li>`).join("")}
+      </ul>
+    </nav>
+    <div>
+      <h2 class="footer-title">${esc(ui.footerContact)}</h2>
+      <ul class="footer-contact">
+        <li>${icon("phone")}<a href="${esc(company.phoneHref)}">${esc(company.phoneDisplay)}</a></li>
+        <li>${icon("mail")}<a href="mailto:${esc(company.email)}">${esc(company.email)}</a></li>
+        <li>${icon("pin")}<span>${esc(company.region)}</span></li>
+      </ul>
+    </div>`);
+}
+
+/* ---------- Before/after sliders ---------- */
+function initCompareSliders() {
+  $$(".compare-frame").forEach((frame) => {
+    const handle = $(".compare-handle", frame);
+    let pos = 50;
+    let dragging = false;
+
+    const set = (value) => {
+      pos = Math.min(100, Math.max(0, value));
+      const rounded = Math.round(pos);
+      frame.style.setProperty("--pos", `${pos}%`);
+      handle.setAttribute("aria-valuenow", String(rounded));
+      handle.setAttribute("aria-valuetext", fmt(SITE.ui.sliderValueText, { pct: rounded }));
+    };
+    const fromPointer = (e) => {
+      const rect = frame.getBoundingClientRect();
+      return ((e.clientX - rect.left) / rect.width) * 100;
+    };
+
+    frame.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      frame.setPointerCapture(e.pointerId);
+      frame.classList.add("is-dragging");
+      handle.focus({ preventScroll: true });
+      set(fromPointer(e));
+    });
+    frame.addEventListener("pointermove", (e) => { if (dragging) set(fromPointer(e)); });
+    const stop = () => { dragging = false; frame.classList.remove("is-dragging"); };
+    frame.addEventListener("pointerup", stop);
+    frame.addEventListener("pointercancel", stop);
+
+    handle.addEventListener("keydown", (e) => {
+      const step = e.shiftKey ? 10 : 2;
+      const keys = {
+        ArrowLeft: pos - step, ArrowDown: pos - step,
+        ArrowRight: pos + step, ArrowUp: pos + step,
+        PageDown: pos - 10, PageUp: pos + 10,
+        Home: 0, End: 100,
+      };
+      if (!(e.key in keys)) return;
+      e.preventDefault();
+      set(keys[e.key]);
+    });
+  });
+}
+
+/* Hide the mobile call/quote bar while the quote form itself is on screen. */
+function initMobileBar() {
+  const bar = $(".mobile-bar");
+  const form = $("#quote-form");
+  if (!bar || !form || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([entry]) => {
+    bar.classList.toggle("is-hidden", entry.isIntersecting);
+  }, { threshold: 0.15 }).observe(form);
+}
+
 /* ---------- Reveal on scroll ---------- */
 function initReveal() {
   const items = $$(".reveal");
@@ -327,6 +581,14 @@ function safely(fn) {
   renderSteps,
   renderChecklist,
   renderPricing,
+  renderGallery,
+  renderReviews,
+  renderAreas,
+  renderFaq,
+  renderContactPanel,
+  renderFooter,
+  initCompareSliders,
+  initMobileBar,
   initServicePrefill,
   initReveal, // last: observes everything rendered above
 ].forEach(safely);

@@ -61,7 +61,7 @@ export const SITE = {
       { icon: "certificate", label: "CPO® & RAIL certified" },
       { icon: "shield", label: "Fully insured" },
     ],
-    image: { base: "hero", alt: "Sparkling blue backyard swimming pool on a sunny day" }, // MOCK photo
+    image: { base: "hero", alt: "Glowing backyard pool and spa at dusk with stone waterfalls and an outdoor fireplace" }, // MOCK photo
   },
 
   trustBadges: {
@@ -162,7 +162,7 @@ export const SITE = {
       ],
       note: "Baskets emptied, filter pressure normal.", // MOCK
     },
-    image: { base: "weekly-service", alt: "Pool technician skimming leaves from a clear backyard pool" }, // MOCK photo
+    image: { base: "weekly-service", alt: "Pool technician skimming a bright blue pool with a long telescopic pole" }, // MOCK photo
   },
 
   pricing: {
@@ -209,10 +209,10 @@ export const SITE = {
     beforeLabel: "Before",
     afterLabel: "After",
     items: [
-      { image: { base: "gallery-1", alt: "Backyard pool with clear blue water" }, caption: "Green-to-clean in 3 visits" },        // MOCK photo + caption
-      { image: { base: "gallery-2", alt: "Pool and attached spa with sparkling water" }, caption: "Pool & spa back to blue in a week" }, // MOCK photo + caption
-      { image: { base: "gallery-3", alt: "Clear pool water over clean tile steps" }, caption: "Cloudy water cleared after a filter clean" }, // MOCK photo + caption
-      { image: { base: "gallery-4", alt: "Modern backyard pool with a clean deck" }, caption: "Storm cleanup, swim-ready next day" }, // MOCK photo + caption
+      { image: { base: "gallery-1", alt: "Aerial view of a turquoise rectangular pool with curved corner steps in a green lawn" }, caption: "Green-to-clean in 3 visits" },        // MOCK photo + caption
+      { image: { base: "gallery-2", alt: "Freeform pool with mosaic tile trim and a raised spa, framed by palm trees" }, caption: "Pool & spa back to blue in a week" }, // MOCK photo + caption
+      { image: { base: "gallery-3", alt: "Crystal-clear pool water over submerged steps with sunlight ripples" }, caption: "Cloudy water cleared after a filter clean" }, // MOCK photo + caption
+      { image: { base: "gallery-4", alt: "Rectangular blue pool with a dark wood deck beside a modern house and green lawn" }, caption: "Storm cleanup, swim-ready next day" }, // MOCK photo + caption
     ],
   },
 
@@ -268,6 +268,8 @@ export const SITE = {
     intro: "Tell us a little about your pool and we'll get back to you within one business day.", // MOCK: confirm response time with Jack
     serviceAreaSummary: "Plano, Richardson, McKinney, Allen, Garland, University Park and North Dallas.",
     otherServiceOption: "Not sure yet / other",
+    panelTitle: "Talk to a real person",
+    panelText: "Family owned means you reach us directly, never a call center.", // MOCK copy, confirm with Jack
     messages: {
       sending: "Sending…",
       success: "Thanks! Your request is in. We'll be in touch within one business day.", // MOCK: confirm response time with Jack
@@ -294,7 +296,11 @@ export const SITE = {
     mapLabel: "Map of the North DFW cities Tide Pools serves",
     popular: "Most Popular",
     socialLabel: "Tide Pools on {name}",
-    footerNav: "Footer",
+    footerNav: "Explore",
+    footerContact: "Contact",
+    footerFollow: "Follow along",
+    reviewsHint: "Swipe for more reviews",
+    mapNorth: "N",
     callUs: "Call",
     emailUs: "Email",
     hours: "Hours",
