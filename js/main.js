@@ -51,6 +51,7 @@ const ICONS = {
   "arrow-both": '<path d="m9 7-5 5 5 5M15 7l5 5-5 5"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
+  "chevron-right": '<path d="m9 6 6 6-6 6"/>',
   instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
   nextdoor: '<path d="M3 11 12 4l9 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/>',
 };
@@ -158,19 +159,32 @@ function initHeader() {
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  // Highlight the nav link for the section in view.
+  // Scroll-spy: the current section is the last one whose top has reached the header's
+  // bottom edge. Nothing is highlighted above the first section, or while the current
+  // section has no nav link (hero, "Difference", "How it works", weekly checklist).
   const links = new Map($$(".nav-list a").map((a) => [a.getAttribute("href").slice(1), a]));
-  const spy = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      const link = links.get(entry.target.id);
-      if (!link) return;
-      if (entry.isIntersecting) {
-        links.forEach((a) => a.removeAttribute("aria-current"));
-        link.setAttribute("aria-current", "true");
-      }
+  const sections = $$("main > section");
+  let ticking = false;
+  const spy = () => {
+    ticking = false;
+    const line = header.getBoundingClientRect().bottom + 1;
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    let current = null;
+    for (const section of sections) {
+      if (section.getBoundingClientRect().top <= line) current = section;
+    }
+    // Short last section (Contact) may never reach the header: activate it at page bottom.
+    if (atBottom && window.scrollY > 0) current = sections[sections.length - 1];
+    const active = current ? links.get(current.id) : null;
+    links.forEach((a) => {
+      if (a === active) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
     });
-  }, { rootMargin: "-45% 0px -50% 0px" });
-  links.forEach((_, id) => { const section = document.getElementById(id); if (section) spy.observe(section); });
+  };
+  const requestSpy = () => { if (!ticking) { ticking = true; requestAnimationFrame(spy); } };
+  spy();
+  window.addEventListener("scroll", requestSpy, { passive: true });
+  window.addEventListener("resize", requestSpy, { passive: true });
 }
 
 /* ---------- Images ---------- */
@@ -239,13 +253,19 @@ function renderSteps() {
       <span class="step-num" aria-hidden="true">${i + 1}</span>
       <h3>${esc(s.title)}</h3>
       <p>${esc(s.text)}</p>
+      <span class="step-arrow" aria-hidden="true">${icon("chevron-right")}</span>
     </li>`).join(""));
 }
 
 function renderChecklist() {
-  const { items, report, image } = SITE.weeklyChecklist;
-  render("checklist", items.map((item) => `
-    <li><span class="check">${icon("check")}</span><span>${esc(item)}</span></li>`).join(""));
+  const { items, highlightLabel, report, image } = SITE.weeklyChecklist;
+  const last = items.length - 1;
+  render("checklist", items.map((item, i) => i === last
+    ? `<li class="checklist-highlight">
+        <span class="checklist-label">${esc(highlightLabel)}</span>
+        <span class="check">${icon("check")}</span><span>${esc(item)}</span>
+      </li>`
+    : `<li><span class="check">${icon("check")}</span><span>${esc(item)}</span></li>`).join(""));
 
   render("weekly-media", `
     <div class="media reveal">${picture(image, "weekly")}</div>
@@ -361,16 +381,10 @@ function renderAreas() {
   const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
   const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
 
-  // Coverage zone: convex hull pushed outward, drawn with rounded corners.
-  const hull = convexHull(pts).map((p) => {
-    const dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy) || 1;
-    return { x: p.x + (dx / d) * 34, y: p.y + (dy / d) * 34 };
-  });
-  const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
-  const zone = hull.map((p, i) => {
-    const m = mid(p, hull[(i + 1) % hull.length]);
-    return `${i === 0 ? `M${mid(hull[hull.length - 1], p).x.toFixed(1)} ${mid(hull[hull.length - 1], p).y.toFixed(1)} ` : ""}Q${p.x.toFixed(1)} ${p.y.toFixed(1)} ${m.x.toFixed(1)} ${m.y.toFixed(1)}`;
-  }).join(" ") + " Z";
+  // Coverage zone: the convex hull of all cities, grown outward by ZONE_R on every side
+  // (edges offset along their outward normals, joined by arcs around each corner),
+  // so every city dot sits at least ZONE_R inside the dashed line.
+  const zone = roundedHullPath(convexHull(pts), 32, cx, cy);
 
   const grid = [];
   for (let x = 20; x < W; x += 40) grid.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}"/>`);
@@ -396,6 +410,31 @@ function renderAreas() {
         <text class="map-compass" x="0" y="16" text-anchor="middle">${esc(SITE.ui.mapNorth)}</text>
       </g>
     </svg>`);
+}
+
+/** SVG path for a convex hull grown outward by radius r (a rounded "capsule" around the points). */
+function roundedHullPath(hull, r, cx, cy) {
+  const f = (n) => n.toFixed(1);
+  if (hull.length === 1) return `M${f(hull[0].x - r)} ${f(hull[0].y)} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+  const normals = hull.map((a, i) => {
+    const b = hull[(i + 1) % hull.length];
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    let nx = (b.y - a.y) / len, ny = -(b.x - a.x) / len;
+    // Point the normal away from the centroid.
+    if (nx * ((a.x + b.x) / 2 - cx) + ny * ((a.y + b.y) / 2 - cy) < 0) { nx = -nx; ny = -ny; }
+    return { x: nx, y: ny };
+  });
+  let d = "";
+  hull.forEach((a, i) => {
+    const b = hull[(i + 1) % hull.length];
+    const n = normals[i];
+    const next = normals[(i + 1) % hull.length];
+    if (i === 0) d += `M${f(a.x + n.x * r)} ${f(a.y + n.y * r)} `;
+    d += `L${f(b.x + n.x * r)} ${f(b.y + n.y * r)} `;
+    const sweep = n.x * next.y - n.y * next.x > 0 ? 1 : 0;
+    d += `A${r} ${r} 0 0 ${sweep} ${f(b.x + next.x * r)} ${f(b.y + next.y * r)} `;
+  });
+  return d + "Z";
 }
 
 /** Monotone-chain convex hull. */
@@ -454,7 +493,13 @@ function renderFooter() {
   const { company, nav, ui } = SITE;
   render("footer", `
     <div class="footer-brand">
-      <img src="./assets/logo-dark.svg" alt="${esc(company.brand)}" width="176" height="48" loading="lazy">
+      <span class="brand brand-lg">
+        <img class="brand-mark" src="./assets/favicon.svg" alt="" width="48" height="48" loading="lazy">
+        <span class="brand-text">
+          <span class="brand-name">${esc(company.brand)}</span>
+          <span class="brand-tagline">${esc(company.logoTagline)}</span>
+        </span>
+      </span>
       <p>${esc(company.about)}</p>
       <ul class="socials">
         ${company.social.map((s) => `
@@ -524,14 +569,29 @@ function initCompareSliders() {
   });
 }
 
-/* Hide the mobile call/quote bar while the quote form itself is on screen. */
+/* Mobile call/quote bar: appears once the hero CTA buttons have scrolled out of view
+   (so it never covers the hero on first load) and steps aside while the quote form is on screen. */
 function initMobileBar() {
   const bar = $(".mobile-bar");
+  const ctas = $(".hero-ctas");
   const form = $("#quote-form");
-  if (!bar || !form || !("IntersectionObserver" in window)) return;
+  if (!bar || !ctas || !("IntersectionObserver" in window)) return;
+  let pastHero = false;
+  let formVisible = false;
+  const update = () => {
+    const show = pastHero && !formVisible;
+    bar.classList.toggle("is-visible", show);
+    bar.inert = !show;
+  };
+  update();
   new IntersectionObserver(([entry]) => {
-    bar.classList.toggle("is-hidden", entry.isIntersecting);
-  }, { threshold: 0.15 }).observe(form);
+    // Past = not visible AND above the viewport (scrolled beyond), not merely below it.
+    pastHero = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0;
+    update();
+  }).observe(ctas);
+  if (form) {
+    new IntersectionObserver(([entry]) => { formVisible = entry.isIntersecting; update(); }, { threshold: 0.15 }).observe(form);
+  }
 }
 
 /* ---------- Quote form ---------- */

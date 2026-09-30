@@ -16,7 +16,8 @@ export const SITE = {
   previewRibbon: "Preview: sample content",
 
   company: {
-    brand: "Tide Pools",
+    brand: "Tide\u00a0Pools", // \u00a0 = non-breaking space (keeps "Tide Pools" on one line)
+    logoTagline: "Pool cleaning & care",
     name: "Tide Pools Texas",
     legalName: "Tide Pools LLC",
     owner: "Jack",
@@ -142,6 +143,7 @@ export const SITE = {
 
   weeklyChecklist: {
     intro: "Every weekly visit covers the full list, and you get proof it was done.",
+    highlightLabel: "The Tide\u00a0Pools difference", // label on the last (highlighted) item
     items: [
       "Skim the surface",
       "Brush walls & steps",
@@ -219,7 +221,7 @@ export const SITE = {
   reviews: {
     rating: 5.0,  // MOCK: replace with real Google rating
     count: 48,    // MOCK: replace with real review count
-    intro: "Neighbors across North DFW trust us with their backyards.",
+    intro: "Real results from families in Plano, Richardson, McKinney and beyond.",
     items: [
       { name: "Megan R.", city: "Plano", rating: 5, date: "2 weeks ago", text: "Our pool went from swamp green to crystal clear in under a week. The E-Reports with photos are a game changer." }, // MOCK
       { name: "Carlos D.", city: "Richardson", rating: 5, date: "1 month ago", text: "On time every week and they actually explain what they're doing. Fair, honest price on a pump repair too." }, // MOCK
