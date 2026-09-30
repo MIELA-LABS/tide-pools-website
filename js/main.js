@@ -538,6 +538,139 @@ function initMobileBar() {
   }, { threshold: 0.15 }).observe(form);
 }
 
+/* ---------- Quote form ---------- */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+
+function initQuoteForm() {
+  const form = $("#quote-form");
+  if (!form) return;
+  const cfg = SITE.contact;
+  const msg = cfg.messages;
+  const status = $("#form-status");
+  const submitLabel = $(".btn-label", form);
+  const idleLabel = submitLabel.textContent;
+
+  // Field rules: return an error message or "".
+  const rules = {
+    first_name: (v) => (v ? "" : msg.required),
+    last_name: (v) => (v ? "" : msg.required),
+    email: (v) => (!v ? msg.required : EMAIL_RE.test(v) ? "" : msg.email),
+    phone: (v) => {
+      if (!v) return "";
+      const digits = v.replace(/\D/g, "");
+      return /^[\d\s()+.\-]+$/.test(v) && digits.length >= 10 && digits.length <= 15 ? "" : msg.phone;
+    },
+  };
+
+  const showError = (input, error) => {
+    const out = document.getElementById(`${input.id}-error`);
+    input.setAttribute("aria-invalid", error ? "true" : "false");
+    if (out) out.textContent = error;
+  };
+  const validateField = (input) => {
+    const rule = rules[input.name];
+    if (!rule) return true;
+    const error = rule(input.value.trim());
+    showError(input, error);
+    return !error;
+  };
+  const setStatus = (type, text) => {
+    status.className = `form-status${type ? ` is-${type}` : ""}`;
+    status.innerHTML = text ? `${icon(type === "success" ? "check" : "close")}<span>${esc(text)}</span>` : "";
+  };
+  const setLoading = (loading) => {
+    form.classList.toggle("is-loading", loading);
+    form.setAttribute("aria-busy", String(loading));
+    $("button[type=submit]", form).disabled = loading;
+    submitLabel.textContent = loading ? msg.sending : idleLabel;
+  };
+
+  // Validate on blur once touched; clear errors as soon as input becomes valid.
+  Object.keys(rules).forEach((name) => {
+    const input = form.elements[name];
+    if (!input) return;
+    input.addEventListener("blur", () => { if (input.value.trim() || input.hasAttribute("aria-invalid")) validateField(input); });
+    input.addEventListener("input", () => { if (input.getAttribute("aria-invalid") === "true") validateField(input); });
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setStatus("", "");
+
+    const inputs = Object.keys(rules).map((n) => form.elements[n]).filter(Boolean);
+    const invalid = inputs.filter((input) => !validateField(input));
+    if (invalid.length) {
+      setStatus("error", msg.summary);
+      invalid[0].focus();
+      return;
+    }
+
+    const data = Object.fromEntries(
+      [...new FormData(form).entries()].map(([k, v]) => [k, String(v).trim()])
+    );
+
+    // Honeypot filled → a bot. Pretend success, send nothing.
+    if (data.company_website) {
+      form.reset();
+      setStatus("success", msg.success);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendQuote(cfg, data);
+      form.reset();
+      $$("[aria-invalid]", form).forEach((el) => el.removeAttribute("aria-invalid"));
+      setStatus("success", msg.success);
+    } catch (err) {
+      if (err.code !== "not-configured") console.error("[tide-pools] quote form:", err);
+      const text = err.code === "not-configured" ? msg.notConfigured : err.serverMessage || msg.error;
+      setStatus("error", fmt(text, companyVars()));
+    } finally {
+      setLoading(false);
+      status.focus();
+    }
+  });
+}
+
+/** Send the quote request with the configured provider. Throws on failure. */
+async function sendQuote(cfg, data) {
+  const fail = (code, serverMessage) => Object.assign(new Error(code), { code, serverMessage });
+
+  if (cfg.provider === "php") {
+    const res = await fetch(cfg.phpEndpoint, {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: new URLSearchParams(data),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.ok) throw fail("php", json.error);
+    return;
+  }
+
+  // Default: Web3Forms (works on static hosting such as GitHub Pages).
+  // Sent as FormData so the browser makes a "simple" CORS request (no preflight).
+  if (!cfg.web3formsKey || cfg.web3formsKey.startsWith("YOUR_")) throw fail("not-configured");
+  const name = `${data.first_name} ${data.last_name}`;
+  const body = new FormData();
+  Object.entries({
+    access_key: cfg.web3formsKey,
+    subject: cfg.subject,
+    from_name: name,
+    replyto: data.email,
+    name,
+    email: data.email,
+    phone: data.phone || "-",
+    address: data.address || "-",
+    service: data.service,
+    message: data.message || "-",
+  }).forEach(([k, v]) => body.append(k, v));
+  const res = await fetch(WEB3FORMS_URL, { method: "POST", headers: { Accept: "application/json" }, body });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.success) throw fail("web3forms");
+}
+
 /* ---------- Reveal on scroll ---------- */
 function initReveal() {
   const items = $$(".reveal");
@@ -590,5 +723,6 @@ function safely(fn) {
   initCompareSliders,
   initMobileBar,
   initServicePrefill,
+  initQuoteForm,
   initReveal, // last: observes everything rendered above
 ].forEach(safely);
