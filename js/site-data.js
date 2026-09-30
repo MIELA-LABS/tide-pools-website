@@ -154,7 +154,7 @@ export const SITE = {
     // Sample E-Report card shown next to the checklist.
     report: {
       title: "E-Report",
-      subtitle: "Weekly visit · Plano",            // MOCK
+      subtitle: "Sample · weekly visit in Plano",  // MOCK
       readings: [
         { label: "Free chlorine", value: "3.0 ppm" }, // MOCK
         { label: "pH", value: "7.4" },                // MOCK
@@ -200,6 +200,7 @@ export const SITE = {
         cta: { label: "Get a quote", service: "Weekly Pool Service" },
       },
     ],
+    periodLabel: "per month", // screen-reader text for "/mo"
     footnote: "Final price depends on pool size and condition. Free on-site quote.",
   },
 

@@ -176,11 +176,140 @@ function initHeader() {
   links.forEach((_, id) => { const section = document.getElementById(id); if (section) spy.observe(section); });
 }
 
+/* ---------- Images ---------- */
+// Export sizes per slot (see README "Replacing photos"). Files: assets/img/{base}-{width}.webp|jpg
+const IMAGE_SLOTS = {
+  weekly:  { widths: [480, 960],  width: 960,  height: 1200, sizes: "(min-width: 960px) 40vw, 100vw" },
+  gallery: { widths: [640, 1200], width: 1200, height: 900,  sizes: "(min-width: 960px) 50vw, 100vw" },
+};
+
+function picture(image, slotName, { eager = false } = {}) {
+  const slot = IMAGE_SLOTS[slotName];
+  const src = (w, ext) => `./assets/img/${image.base}-${w}.${ext}`;
+  const set = (ext) => slot.widths.map((w) => `${src(w, ext)} ${w}w`).join(", ");
+  return `<picture>
+    <source type="image/webp" srcset="${set("webp")}" sizes="${slot.sizes}">
+    <img src="${src(slot.width, "jpg")}" srcset="${set("jpg")}" sizes="${slot.sizes}"
+      alt="${esc(image.alt)}" width="${slot.width}" height="${slot.height}"
+      ${eager ? "" : 'loading="lazy"'} decoding="async">
+  </picture>`;
+}
+
 /* ---------- Section renderers ---------- */
 function renderHeroStats() {
   render("hero-stats", SITE.hero.stats
     .map((s) => `<li>${icon(s.icon)}<span>${esc(s.label)}</span></li>`)
     .join(""));
+}
+
+function renderDifference() {
+  const { pillars, credentials } = SITE.trustBadges;
+  render("pillars", pillars.map((p, i) => `
+    <article class="pillar reveal" style="--i:${i}">
+      <div class="icon-tile">${icon(p.icon)}</div>
+      <h3>${esc(p.title)}</h3>
+      <p>${esc(p.text)}</p>
+    </article>`).join(""));
+  render("credentials", credentials
+    .map((c) => `<li class="badge">${icon(c.icon)}<span>${esc(c.label)}</span></li>`)
+    .join(""));
+}
+
+function renderServices() {
+  render("services", SITE.services.categories.map((cat, i) => `
+    <article class="service-group reveal" style="--i:${i}" aria-labelledby="svc-${esc(cat.id)}">
+      <header class="service-group-head">
+        <span class="service-group-count">${String(i + 1).padStart(2, "0")}</span>
+        <h3 id="svc-${esc(cat.id)}">${esc(cat.title)}</h3>
+        <p>${esc(cat.blurb)}</p>
+      </header>
+      <ul class="service-list">
+        ${cat.items.map((s) => `
+          <li class="service">
+            <span class="icon-tile">${icon(s.icon)}</span>
+            <div>
+              <h4>${esc(s.name)}</h4>
+              <p>${esc(s.description)}</p>
+            </div>
+          </li>`).join("")}
+      </ul>
+    </article>`).join(""));
+}
+
+function renderSteps() {
+  render("steps", SITE.howItWorks.steps.map((s, i) => `
+    <li class="step reveal" style="--i:${i}">
+      <span class="step-num" aria-hidden="true">${i + 1}</span>
+      <h3>${esc(s.title)}</h3>
+      <p>${esc(s.text)}</p>
+    </li>`).join(""));
+}
+
+function renderChecklist() {
+  const { items, report, image } = SITE.weeklyChecklist;
+  render("checklist", items.map((item) => `
+    <li><span class="check">${icon("check")}</span><span>${esc(item)}</span></li>`).join(""));
+
+  render("weekly-media", `
+    <div class="media reveal">${picture(image, "weekly")}</div>
+    <aside class="report-card reveal" style="--i:2" aria-label="${esc(report.title)}">
+      <div class="report-head">
+        <span class="icon-tile">${icon("report")}</span>
+        <div><strong>${esc(report.title)}</strong><span>${esc(report.subtitle)}</span></div>
+      </div>
+      <dl class="report-readings">
+        ${report.readings.map((r) => `<div><dt>${esc(r.label)}</dt><dd>${esc(r.value)}</dd></div>`).join("")}
+      </dl>
+      <p class="report-note">${icon("check", "icon")}${esc(report.note)}</p>
+    </aside>`);
+}
+
+function renderPricing() {
+  const { tiers, periodLabel } = SITE.pricing;
+  render("pricing", tiers.map((t, i) => `
+    <article class="price-card reveal${t.featured ? " is-featured" : ""}" style="--i:${i}">
+      ${t.badge ? `<p class="price-badge">${esc(t.badge)}</p>` : ""}
+      <h3>${esc(t.name)}</h3>
+      <p class="price-desc">${esc(t.description)}</p>
+      <p class="price">
+        <span class="price-prefix">${esc(t.prefix)}</span>
+        <span class="price-amount">$${esc(t.price)}</span>
+        <span class="price-period" aria-hidden="true">${esc(t.period)}</span>
+        <span class="visually-hidden">${esc(periodLabel)}</span>
+      </p>
+      <ul class="price-features">
+        ${t.features.map((f) => `<li>${icon("check")}<span>${esc(f)}</span></li>`).join("")}
+      </ul>
+      <a class="btn ${t.featured ? "btn-primary" : "btn-outline"} btn-block" href="#contact" data-service="${esc(t.cta.service)}">${esc(t.cta.label)}</a>
+    </article>`).join(""));
+}
+
+/* ---------- Reveal on scroll ---------- */
+function initReveal() {
+  const items = $$(".reveal");
+  if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+    items.forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+  items.forEach((el) => io.observe(el));
+}
+
+/* Pricing "Get a quote" buttons preselect the service in the form. */
+function initServicePrefill() {
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-service]");
+    const select = $("#f-service");
+    if (!trigger || !select) return;
+    const option = [...select.options].find((o) => o.value === trigger.dataset.service);
+    if (option) select.value = option.value;
+  });
 }
 
 /* ---------- Boot ---------- */
@@ -193,4 +322,11 @@ function safely(fn) {
   initRibbon,
   initHeader,
   renderHeroStats,
+  renderDifference,
+  renderServices,
+  renderSteps,
+  renderChecklist,
+  renderPricing,
+  initServicePrefill,
+  initReveal, // last: observes everything rendered above
 ].forEach(safely);
