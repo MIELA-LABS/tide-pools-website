@@ -173,7 +173,7 @@ When `before` is set, the green CSS filter is switched off automatically.
 
 ## Quality notes
 
-- **Lighthouse (mobile, live GitHub Pages):** Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100.
+- **Lighthouse (mobile, live GitHub Pages):** Performance 98–100 (varies run to run) · Accessibility 100 · Best Practices 100 · SEO 100.
 - Checked at 360, 768, 1024 and 1440px with no horizontal scroll.
 - Keyboard: skip link, visible focus rings, accessible mobile menu (focus trap, Esc to close), before/after sliders
   operable with arrow keys, Home and End (`role="slider"` with aria values).
