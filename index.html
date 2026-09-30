@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tide Pools Texas | Pool Service &amp; Repair in Plano, Richardson, McKinney &amp; North Dallas</title>
+  <meta name="description" content="Family-owned pool cleaning, repair and weekly service in the North DFW metroplex since 2020. CPO® &amp; RAIL certified, fully insured, E-Reports with every visit. Get a free quote.">
+  <link rel="canonical" href="https://www.tidepoolsllc.com/">
+  <meta name="theme-color" content="#060D1F">
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./assets/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./css/styles.css">
+
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="./js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Preview ribbon (rendered from SITE.isPreview) -->
+  <div id="preview-ribbon" class="preview-ribbon" hidden></div>
+
+  <!-- 1. Sticky header -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Tide Pools, back to top">
+        <img src="./assets/logo-dark.svg" alt="Tide Pools" width="176" height="48">
+      </a>
+
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <ul class="nav-list">
+          <li><a href="#services">Services</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+          <li><a href="#reviews">Reviews</a></li>
+          <li><a href="#areas">Areas</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a class="nav-phone" href="tel:+12145389993" data-bind="company.phoneDisplay" data-bind-href="company.phoneHref">(214) 538-9993</a>
+          <a class="btn btn-primary btn-sm" href="#contact">Free Quote</a>
+        </div>
+      </nav>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <!-- 2. Hero -->
+    <section class="hero section-dark" aria-labelledby="hero-title">
+      <picture class="hero-media">
+        <source type="image/webp" srcset="./assets/img/hero-960.webp 960w, ./assets/img/hero-1920.webp 1920w" sizes="100vw">
+        <img src="./assets/img/hero-1920.jpg" srcset="./assets/img/hero-960.jpg 960w, ./assets/img/hero-1920.jpg 1920w" sizes="100vw"
+             alt="Sparkling blue backyard swimming pool on a sunny day" width="1920" height="1280" fetchpriority="high" decoding="async" data-bind-alt="hero.image.alt">
+      </picture>
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <div class="container hero-inner">
+        <p class="eyebrow" data-bind="hero.eyebrow">Pool cleaning &amp; care · North DFW</p>
+        <h1 id="hero-title" class="hero-title" data-bind="hero.headline">Crystal-clear pools, zero hassle.</h1>
+        <p class="hero-sub" data-bind="hero.subline">Weekly service, honest repairs and a photo E-Report after every visit, for homes in Plano, Richardson, McKinney, Allen, Garland, University Park and North Dallas.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary btn-lg" href="#contact" data-bind="hero.primaryCta.label" data-bind-href="hero.primaryCta.href">Get a Free Quote</a>
+          <a class="btn btn-ghost btn-lg" href="tel:+12145389993" data-bind="hero.secondaryCta.label" data-bind-href="hero.secondaryCta.href">Call (214) 538-9993</a>
+        </div>
+        <ul class="hero-stats" data-render="hero-stats">
+          <li>Family owned since 2020</li>
+          <li>CPO® &amp; RAIL certified</li>
+          <li>Fully insured</li>
+        </ul>
+      </div>
+
+      <div class="wave-divider" aria-hidden="true">
+        <svg viewBox="0 0 2880 120" preserveAspectRatio="none" focusable="false">
+          <path class="wave wave-back" d="M0 60 C240 20 480 20 720 60 S1200 100 1440 60 S1920 20 2160 60 S2640 100 2880 60 V120 H0 Z"/>
+          <path class="wave wave-front" d="M0 80 C240 50 480 50 720 80 S1200 110 1440 80 S1920 50 2160 80 S2640 110 2880 80 V120 H0 Z"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 3. The Tide Pools Difference + credentials -->
+    <section class="section section-white" id="difference" aria-labelledby="difference-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Why Tide Pools</p>
+          <h2 id="difference-title">The Tide Pools Difference</h2>
+          <p class="section-intro" data-bind="trustBadges.intro"></p>
+        </header>
+        <div class="pillars" data-render="pillars"></div>
+        <ul class="badges" data-render="credentials" aria-label="Credentials"></ul>
+      </div>
+    </section>
+
+    <!-- 4. Services -->
+    <section class="section section-surface" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Services</p>
+          <h2 id="services-title">Everything your pool needs</h2>
+          <p class="section-intro" data-bind="services.intro"></p>
+        </header>
+        <div class="service-groups" data-render="services"></div>
+      </div>
+    </section>
+
+    <!-- 5. How it works -->
+    <section class="section section-tint" id="how-it-works" aria-labelledby="how-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">Three steps to a pool you never think about</h2>
+          <p class="section-intro" data-bind="howItWorks.intro"></p>
+        </header>
+        <ol class="steps" data-render="steps"></ol>
+      </div>
+    </section>
+
+    <!-- 6. What's included in a weekly visit -->
+    <section class="section section-dark" id="weekly" aria-labelledby="weekly-title">
+      <div class="container weekly">
+        <div class="weekly-copy">
+          <header class="section-head section-head-left">
+            <p class="eyebrow">Weekly service</p>
+            <h2 id="weekly-title">What's included in every visit</h2>
+            <p class="section-intro" data-bind="weeklyChecklist.intro"></p>
+          </header>
+          <ul class="checklist" data-render="checklist"></ul>
+        </div>
+        <div class="weekly-media" data-render="weekly-media"></div>
+      </div>
+    </section>
+
+    <!-- 7. Pricing -->
+    <section class="section section-white" id="pricing" aria-labelledby="pricing-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Pricing</p>
+          <h2 id="pricing-title">Simple, honest pricing</h2>
+          <p class="section-intro" data-bind="pricing.intro"></p>
+        </header>
+        <div class="pricing" data-render="pricing"></div>
+        <p class="pricing-footnote" data-bind="pricing.footnote"></p>
+      </div>
+    </section>
+
+    <!-- 8. Before & After gallery -->
+    <section class="section section-surface" id="gallery" aria-labelledby="gallery-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Before &amp; after</p>
+          <h2 id="gallery-title">See the difference</h2>
+          <p class="section-intro" data-bind="gallery.intro"></p>
+        </header>
+        <div class="gallery" data-render="gallery"></div>
+      </div>
+    </section>
+
+    <!-- 9. Reviews -->
+    <section class="section section-tint" id="reviews" aria-labelledby="reviews-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Reviews</p>
+          <h2 id="reviews-title">Loved by pool owners across North DFW</h2>
+          <p class="section-intro" data-bind="reviews.intro"></p>
+          <div class="rating-badge" data-render="rating"></div>
+        </header>
+        <div class="reviews" data-render="reviews"></div>
+      </div>
+    </section>
+
+    <!-- 10. Service areas -->
+    <section class="section section-dark" id="areas" aria-labelledby="areas-title">
+      <div class="container areas">
+        <div class="areas-copy">
+          <header class="section-head section-head-left">
+            <p class="eyebrow">Service areas</p>
+            <h2 id="areas-title">Do we serve your area?</h2>
+            <p class="section-intro" data-bind="serviceAreas.intro"></p>
+          </header>
+          <ul class="chips" data-render="area-chips" aria-label="Cities we serve">
+            <li>University Park</li><li>North Dallas</li><li>Garland</li><li>Richardson</li><li>Plano</li><li>Allen</li><li>McKinney</li>
+          </ul>
+          <p class="areas-note">
+            <span data-bind="serviceAreas.note">Don't see your city? Call us, we may still cover you.</span>
+            <a href="tel:+12145389993" data-bind="company.phoneDisplay" data-bind-href="company.phoneHref">(214) 538-9993</a>
+          </p>
+        </div>
+        <div class="areas-map" data-render="area-map"></div>
+      </div>
+    </section>
+
+    <!-- 11. FAQ -->
+    <section class="section section-white" id="faq" aria-labelledby="faq-title">
+      <div class="container container-narrow">
+        <header class="section-head">
+          <p class="eyebrow">FAQ</p>
+          <h2 id="faq-title">Questions, answered</h2>
+          <p class="section-intro" data-bind="faq.intro"></p>
+        </header>
+        <div class="faq" data-render="faq"></div>
+      </div>
+    </section>
+
+    <!-- 12. Contact / Get a Free Quote -->
+    <section class="section section-surface" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">Free quote</p>
+          <h2 id="contact-title">Get a free quote</h2>
+          <p class="section-intro" data-bind="contact.intro"></p>
+        </header>
+
+        <div class="contact">
+          <form class="quote-form card" id="quote-form" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label for="f-first">First name <span class="req" aria-hidden="true">*</span></label>
+                <input id="f-first" name="first_name" type="text" autocomplete="given-name" required aria-describedby="f-first-error">
+                <p class="field-error" id="f-first-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label for="f-last">Last name <span class="req" aria-hidden="true">*</span></label>
+                <input id="f-last" name="last_name" type="text" autocomplete="family-name" required aria-describedby="f-last-error">
+                <p class="field-error" id="f-last-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label for="f-email">Email <span class="req" aria-hidden="true">*</span></label>
+                <input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="f-email-error">
+                <p class="field-error" id="f-email-error" aria-live="polite"></p>
+              </div>
+              <div class="field">
+                <label for="f-phone">Phone <span class="optional">(optional)</span></label>
+                <input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="f-phone-error">
+                <p class="field-error" id="f-phone-error" aria-live="polite"></p>
+              </div>
+              <div class="field field-full">
+                <label for="f-address">Address or city <span class="optional">(optional)</span></label>
+                <input id="f-address" name="address" type="text" autocomplete="street-address">
+              </div>
+              <div class="field field-full">
+                <label for="f-service">Service interested in</label>
+                <div class="select-wrap">
+                  <select id="f-service" name="service" data-render="service-options">
+                    <option value="Weekly Pool Service">Weekly Pool Service</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field field-full">
+                <label for="f-message">Message <span class="optional">(optional)</span></label>
+                <textarea id="f-message" name="message" rows="4"></textarea>
+              </div>
+              <!-- Honeypot: humans never see or fill this. -->
+              <div class="hp" aria-hidden="true">
+                <label for="f-website">Company website</label>
+                <input id="f-website" name="company_website" type="text" tabindex="-1" autocomplete="off">
+              </div>
+            </div>
+            <p class="req-note"><span aria-hidden="true">*</span> Required field</p>
+            <button class="btn btn-primary btn-lg btn-block" type="submit">
+              <span class="btn-label">Send my quote request</span>
+            </button>
+            <div class="form-status" id="form-status" role="status" aria-live="polite" tabindex="-1"></div>
+          </form>
+
+          <aside class="contact-panel" aria-label="Contact details" data-render="contact-panel">
+            <p><a href="tel:+12145389993">(214) 538-9993</a></p>
+            <p><a href="mailto:Swim@tidepoolsllc.com">Swim@tidepoolsllc.com</a></p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 13. Footer -->
+  <footer class="site-footer section-dark">
+    <div class="container footer-grid" data-render="footer">
+      <div class="footer-brand">
+        <img src="./assets/logo-dark.svg" alt="Tide Pools" width="176" height="48" loading="lazy">
+        <p>Tide Pools Texas. Family owned and operated since 2020, servicing the North DFW metroplex.</p>
+        <p><a href="tel:+12145389993">(214) 538-9993</a> · <a href="mailto:Swim@tidepoolsllc.com">Swim@tidepoolsllc.com</a></p>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© <span data-year>2026</span> Tide Pools. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- 14. Mobile sticky bottom bar -->
+  <nav class="mobile-bar" aria-label="Quick contact">
+    <a class="btn btn-ghost" href="tel:+12145389993" data-bind-href="company.phoneHref">Call</a>
+    <a class="btn btn-primary" href="#contact">Free Quote</a>
+  </nav>
+</body>
+</html>
